@@ -116,7 +116,7 @@ public class NpcEditorMenu extends Menu {
                 shop.admin = !shop.admin;
             }
             case 24 -> {
-                new NpcShopMenu(plugin, shop, p).open(p);
+                plugin.openNpcShop(p, shop);
                 return;
             }
             case 27 -> {
