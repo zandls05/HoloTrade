@@ -32,6 +32,10 @@ public final class Items {
         return icon(Material.GRAY_STAINED_GLASS_PANE, " ");
     }
 
+    public static ItemStack pane(Material m) {
+        return icon(m, " ");
+    }
+
     public static boolean isEmpty(ItemStack it) {
         return it == null || it.getType().isAir();
     }
@@ -58,7 +62,11 @@ public final class Items {
     public static String name(ItemStack it) {
         if (it == null) return "-";
         ItemMeta m = it.getItemMeta();
-        if (m != null && m.hasDisplayName() && m.displayName() != null) return Txt.legacy(m.displayName());
+        if (m != null) {
+            // nombre custom (Oraxen, ItemsAdder, yunque...) antes que el tipo de material
+            if (m.hasDisplayName() && m.displayName() != null) return Txt.legacy(m.displayName());
+            if (m.hasItemName()) return Txt.legacy(m.itemName());
+        }
         return pretty(it.getType());
     }
 
