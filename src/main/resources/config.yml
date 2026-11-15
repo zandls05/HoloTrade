@@ -13,6 +13,7 @@ loyalty:
 
 npc:
   notify-owner: true
+  menu-style: merchant           # merchant = interfaz de aldeano (Comercios) | chest = menu de inventario
 
 display:
   height: 1.35
