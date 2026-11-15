@@ -16,6 +16,8 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.TradeSelectEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -174,7 +176,7 @@ public class ShopListener implements Listener {
         if (p.isSneaking() && plugin.canManage(p, s.owner)) {
             new NpcEditorMenu(plugin, s).open(p);
         } else {
-            new NpcShopMenu(plugin, s, p).open(p);
+            plugin.openNpcShop(p, s);
         }
     }
 
@@ -188,6 +190,35 @@ public class ShopListener implements Listener {
     // =====================================================================
     //  MENUS
     // =====================================================================
+    // ---- menu de comercio estilo aldeano ----
+    @EventHandler
+    public void onTradeSelect(TradeSelectEvent e) {
+        NpcMerchantMenu m = NpcMerchantMenu.of(e.getWhoClicked());
+        if (m == null) return;
+        e.setCancelled(true);              // nada de autocompletar ingredientes vanilla
+        m.select(e.getIndex());
+    }
+
+    @EventHandler
+    public void onMerchantClick(InventoryClickEvent e) {
+        if (e.getView().getTopInventory().getType() != InventoryType.MERCHANT) return;
+        if (NpcMerchantMenu.of(e.getWhoClicked()) == null) return;
+        if (e.getRawSlot() < 3 || e.isShiftClick() || e.getClick() == org.bukkit.event.inventory.ClickType.DOUBLE_CLICK
+                || e.getClick() == org.bukkit.event.inventory.ClickType.NUMBER_KEY) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onMerchantDrag(InventoryDragEvent e) {
+        if (e.getView().getTopInventory().getType() != InventoryType.MERCHANT) return;
+        if (NpcMerchantMenu.of(e.getWhoClicked()) == null) return;
+        for (int s : e.getRawSlots()) if (s < 3) {
+            e.setCancelled(true);
+            return;
+        }
+    }
+
     @EventHandler
     public void onClick(InventoryClickEvent e) {
         Inventory top = e.getView().getTopInventory();
@@ -223,5 +254,6 @@ public class ShopListener implements Listener {
     @EventHandler
     public void onClose(InventoryCloseEvent e) {
         if (e.getInventory().getHolder() instanceof Menu menu) menu.onClose(e);
+        if (e.getInventory().getType() == InventoryType.MERCHANT && e.getPlayer() instanceof Player p) NpcMerchantMenu.closed(p);
     }
 }
