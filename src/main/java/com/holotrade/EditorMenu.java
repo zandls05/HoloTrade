@@ -80,6 +80,11 @@ public class EditorMenu extends Menu {
         inv.setItem(42, Items.icon(Material.ENDER_CHEST, "§dPozo de premios §7(" + shop.pool.size() + ")",
                 "§7Solo se usa en el tipo " + TradeType.MYSTERY.color + "Misterio§7.", "", "§eClick para editar"));
 
+        inv.setItem(47, Items.icon(Material.NAME_TAG, "§e§lEditar holograma",
+                "§7Texto: §f" + (shop.customText == null ? "automatico" : shop.customText.replace("\n", " | ")),
+                "§7Altura: §f" + (shop.holoHeight < 0 ? "por defecto" : String.valueOf(shop.holoHeight)),
+                "§7Escala: §f" + shop.holoScale, "",
+                "§eClick: ver comandos en el chat"));
         inv.setItem(45, Items.icon(Material.ARROW, "§7Volver al menu"));
         inv.setItem(49, Items.icon(Material.EMERALD_BLOCK, "§a§lGuardar y cerrar"));
         inv.setItem(53, Items.icon(Material.TNT, "§c§lEliminar tienda", "§7Shift + click para confirmar"));
@@ -135,6 +140,12 @@ public class EditorMenu extends Menu {
             case 42 -> {
                 switching = true;
                 new PoolMenu(plugin, shop).open(p);
+                return;
+            }
+            case 47 -> {
+                p.sendMessage(Txt.t("§6Mira la tienda y usa:"));
+                p.sendMessage(Txt.t("§e/ht holo text <texto> §7(& colores, | salto de linea)"));
+                p.sendMessage(Txt.t("§e/ht holo height <0-8> §7| §e/ht holo scale <0.3-3> §7| §e/ht holo reset"));
                 return;
             }
             case 45 -> {
