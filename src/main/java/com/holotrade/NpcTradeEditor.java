@@ -8,6 +8,9 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** Editor de una oferta: resultado, 2 costes en items, precio en dinero, forma de pago, stock, limites. */
 public class NpcTradeEditor extends Menu {
     private final HoloTradePlugin plugin;
@@ -28,13 +31,31 @@ public class NpcTradeEditor extends Menu {
     }
 
     private void render() {
-        for (int i = 0; i < 54; i++) inv.setItem(i, Items.pane());
+        for (int i = 0; i < 54; i++) inv.setItem(i, Items.pane(Material.BLACK_STAINED_GLASS_PANE));
+        for (int i = 0; i < 9; i++) inv.setItem(i, Items.pane(Material.PURPLE_STAINED_GLASS_PANE));
+        for (int i = 45; i < 54; i++) inv.setItem(i, Items.pane(Material.PURPLE_STAINED_GLASS_PANE));
 
-        inv.setItem(4, Items.icon(Material.BOOK, "§6Como editar",
-                "§7Pon un item en el cursor y haz click",
-                "§7en un slot para copiarlo (no se gasta).",
-                "§7Cursor vacio: izq +1 / der -1 cantidad,",
-                "§7Shift+der quita el item."));
+        inv.setItem(4, Items.icon(Material.BOOK, "§d§lComo editar",
+                "",
+                "§5▸ §7Pon un item en el §fcursor §7y haz click",
+                "§5▸ §7en un slot para copiarlo §8(no se gasta)",
+                "§5▸ §7Cursor vacio: §aizq +1 §7/ §cder -1 §7cantidad",
+                "§5▸ §cShift+der §7quita el item",
+                "§5▸ §7Tambien sirve la tecla numerica (hotbar)"));
+
+        // vista previa de lo que vera el cliente
+        List<String> pv = new ArrayList<>();
+        pv.add("");
+        pv.add("§7Recibe: §a" + (t.result == null ? "§c-" : t.result.getAmount() + "x " + Items.name(t.result)));
+        if (t.acceptsItems()) {
+            pv.add("§7Items: §f" + (t.cost1 == null ? "§c-" : t.cost1.getAmount() + "x " + Items.name(t.cost1)
+                    + (t.cost2 != null ? " §7+ §f" + t.cost2.getAmount() + "x " + Items.name(t.cost2) : "")));
+        }
+        if (t.acceptsMoney()) pv.add("§7Dinero: §e" + plugin.eco().format(t.money));
+        pv.add("§7Stock: §f" + (shop.admin ? (t.stock < 0 ? "∞" : String.valueOf(t.stock)) : "del cofre"));
+        pv.add("§7Limite: §f" + (t.limit <= 0 ? "ninguno" : t.limit + " por jugador")
+                + " §8| §7Cooldown: §f" + (t.cooldown <= 0 ? "ninguno" : Items.time(t.cooldown)));
+        inv.setItem(22, Items.icon(Material.SPYGLASS, "§b§lVista previa", pv.toArray(new String[0])));
 
         inv.setItem(10, slot(t.result, "§a§lRECIBE el cliente", "Click con item en el cursor."));
         inv.setItem(12, t.acceptsItems()
@@ -45,26 +66,26 @@ public class NpcTradeEditor extends Menu {
                 : Items.icon(Material.GRAY_DYE, "§7Pago en items desactivado"));
         inv.setItem(16, t.acceptsMoney()
                 ? Items.icon(Material.GOLD_INGOT, "§e§lPRECIO EN DINERO: §f" + plugin.eco().format(t.money),
-                "§7Izq +1 / Der -1", "§7Shift: +-10", "§7Q: +100 / Ctrl+Q: -100")
+                "", "§aIzq +1 §7/ §cDer -1", "§aShift §7+-10", "§aQ §7+100 §8/ §cCtrl+Q §7-100")
                 : Items.icon(Material.GRAY_DYE, "§7Pago en dinero desactivado"));
 
         inv.setItem(28, Items.icon(Material.NAME_TAG, "§6Forma de pago: §f" + t.mode.label,
-                "§7Items, dinero (Vault) o que el cliente elija.", "",
-                "§eClick: cambiar", "§8Dinero requiere el permiso holotrade.money"));
+                "", "§7Items, dinero (Vault) o que", "§7el cliente elija.", "",
+                "§eClick: §7cambiar", "§8Dinero requiere el permiso holotrade.money"));
 
         if (shop.admin) {
             inv.setItem(30, Items.icon(Material.CHEST, "§6Stock: §f" + (t.stock < 0 ? "Infinito" : String.valueOf(t.stock)),
-                    "§7Izq +1 / Der -1 | Shift +-10", "§7-1 = infinito"));
+                    "", "§aIzq +1 §7/ §cDer -1  §8|  §7Shift +-10", "§7-1 = infinito"));
             inv.setItem(31, Items.icon(Material.HOPPER,
                     "§6Reposicion: §f" + (t.restockSec <= 0 ? "Ninguna" : "1 cada " + Items.time(t.restockSec)),
-                    "§7Repone stock solo hasta el tope configurado.", "§7Izq +10s / Der -10s | Shift +-60s"));
+                    "", "§7Repone stock solo hasta el tope", "§7configurado.", "§aIzq +10s §7/ §cDer -10s  §8|  §7Shift +-60s"));
         } else {
             inv.setItem(30, Items.icon(Material.BARREL, "§6Stock: del cofre", "§7En tiendas de jugador el stock es el cofre vinculado."));
         }
         inv.setItem(32, Items.icon(Material.PLAYER_HEAD, "§6Limite por jugador: §f" + (t.limit <= 0 ? "Sin limite" : String.valueOf(t.limit)),
-                "§7Compras maximas por cliente.", "§7Izq +1 / Der -1 | Shift +-10"));
+                "", "§7Compras maximas por cliente.", "§aIzq +1 §7/ §cDer -1  §8|  §7Shift +-10"));
         inv.setItem(34, Items.icon(Material.CLOCK, "§6Cooldown: §f" + (t.cooldown <= 0 ? "Ninguno" : Items.time(t.cooldown)),
-                "§7Espera entre compras por jugador.", "§7Izq +10s / Der -10s | Shift +-60s"));
+                "", "§7Espera entre compras por jugador.", "§aIzq +10s §7/ §cDer -10s  §8|  §7Shift +-60s"));
 
         inv.setItem(45, Items.icon(Material.ARROW, "§7Volver a ofertas"));
         inv.setItem(49, Items.icon(t.ready() ? Material.EMERALD_BLOCK : Material.REDSTONE_BLOCK,
