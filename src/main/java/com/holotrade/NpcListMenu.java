@@ -17,17 +17,20 @@ public class NpcListMenu extends Menu {
         this.plugin = plugin;
         this.list = plugin.npcs().byOwner(owner.getUniqueId());
         this.inv = Bukkit.createInventory(this, 54, Txt.t("§8Mis NPC"));
-        for (int i = 0; i < 54; i++) inv.setItem(i, Items.pane());
+        for (int i = 0; i < 54; i++) inv.setItem(i, Items.pane(i >= 45 ? Material.PURPLE_STAINED_GLASS_PANE : Material.BLACK_STAINED_GLASS_PANE));
         for (int i = 0; i < Math.min(45, list.size()); i++) {
             NpcShop s = list.get(i);
             inv.setItem(i, Items.icon(Material.VILLAGER_SPAWN_EGG, "§6" + s.name.replace('&', '§'),
-                    "§7Tipo: §f" + (s.admin ? "ADMIN" : "Jugador"),
-                    "§7Ofertas: §f" + s.trades.size(),
-                    "§7Ubicacion: §f" + (int) s.x + ", " + (int) s.y + ", " + (int) s.z + " §8(" + s.world + ")",
-                    "", "§eClick: editar",
-                    owner.hasPermission("holotrade.admin") ? "§eShift+click: teletransportarte" : ""));
+                    "",
+                    "§5▸ §dTipo: " + (s.admin ? "§bAdmin" : "§aJugador"),
+                    "§5▸ §dOfertas: §a" + s.trades.stream().filter(NpcTrade::ready).count() + "§7/§f" + s.trades.size(),
+                    "§5▸ §dCompras totales: §f" + s.purchases.values().stream().mapToInt(Integer::intValue).sum(),
+                    "§5▸ §dCofre: " + (s.admin ? "§8no usa" : (s.hasChest ? "§avinculado" : "§csin vincular")),
+                    "§5▸ §dUbicacion: §f" + (int) s.x + ", " + (int) s.y + ", " + (int) s.z + " §8(" + s.world + ")",
+                    "", "§eClick: §7editar",
+                    owner.hasPermission("holotrade.admin") ? "§eShift+click: §7teletransportarte" : ""));
         }
-        inv.setItem(49, Items.icon(Material.ARROW, "§7Volver"));
+        inv.setItem(49, Items.icon(Material.ARROW, "§7« Volver"));
     }
 
     @Override
