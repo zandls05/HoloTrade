@@ -189,18 +189,83 @@ public class HoloTradePlugin extends JavaPlugin implements CommandExecutor, TabC
                 }
             }
             case "npc" -> npcCommand(p, args);
+            case "holo" -> holoCommand(p, args);
             default -> {
                 p.sendMessage(Txt.t("§6HoloTrade §7- comandos:"));
                 p.sendMessage(Txt.t("§e/ht §7menu principal"));
                 p.sendMessage(Txt.t("§e/ht create §7tienda holograma en el bloque que miras"));
                 p.sendMessage(Txt.t("§e/ht list §7mis tiendas holograma"));
                 p.sendMessage(Txt.t("§e/ht delete §7borrar la tienda holograma que miras"));
+                p.sendMessage(Txt.t("§e/ht holo text|height|scale|reset §7editar el holograma de la tienda que miras"));
                 p.sendMessage(Txt.t("§e/ht npc create [admin] §7crear NPC"));
                 p.sendMessage(Txt.t("§e/ht npc edit|name <texto>|link|delete|list §7(mirando al NPC)"));
                 p.sendMessage(Txt.t("§e/ht reload §7(admin)"));
             }
         }
         return true;
+    }
+
+    private void holoCommand(Player p, String[] args) {
+        Block b = p.getTargetBlockExact(6);
+        TradeShop s = b == null ? null : shops.get(b);
+        if (s == null) {
+            p.sendMessage(msg("not-a-shop"));
+            return;
+        }
+        if (!canManage(p, s.owner)) {
+            p.sendMessage(msg("not-yours"));
+            return;
+        }
+        String op = args.length > 1 ? args[1].toLowerCase() : "";
+        switch (op) {
+            case "text" -> {
+                if (args.length < 3) {
+                    p.sendMessage(Txt.t("§cUso: /ht holo text <texto>  §7(usa & para colores y | para salto de linea)"));
+                    return;
+                }
+                String raw = String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length));
+                s.customText = raw.replace("|", "\n");
+            }
+            case "height" -> {
+                Double v = args.length > 2 ? parseNum(args[2]) : null;
+                if (v == null) {
+                    p.sendMessage(Txt.t("§cUso: /ht holo height <0-8>"));
+                    return;
+                }
+                s.holoHeight = Math.max(0, Math.min(8, v));
+            }
+            case "scale" -> {
+                Double v = args.length > 2 ? parseNum(args[2]) : null;
+                if (v == null) {
+                    p.sendMessage(Txt.t("§cUso: /ht holo scale <0.3-3>"));
+                    return;
+                }
+                s.holoScale = (float) Math.max(0.3, Math.min(3, v));
+            }
+            case "reset" -> {
+                s.customText = null;
+                s.holoHeight = -1;
+                s.holoScale = 1f;
+            }
+            default -> {
+                p.sendMessage(Txt.t("§e/ht holo text <texto> §7(& colores, | salto de linea)"));
+                p.sendMessage(Txt.t("§e/ht holo height <0-8> §7altura sobre el bloque"));
+                p.sendMessage(Txt.t("§e/ht holo scale <0.3-3> §7tamano del item flotante"));
+                p.sendMessage(Txt.t("§e/ht holo reset §7volver al holograma automatico"));
+                return;
+            }
+        }
+        shops.markDirty();
+        shops.refresh(s);
+        p.sendMessage(Txt.t("§aHolograma actualizado."));
+    }
+
+    private static Double parseNum(String s) {
+        try {
+            return Double.parseDouble(s.replace(',', '.'));
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private void npcCommand(Player p, String[] args) {
@@ -248,8 +313,12 @@ public class HoloTradePlugin extends JavaPlugin implements CommandExecutor, TabC
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
         List<String> out = new ArrayList<>();
         if (args.length == 1) {
-            for (String s : new String[]{"menu", "create", "list", "delete", "npc", "reload", "help"}) {
+            for (String s : new String[]{"menu", "create", "list", "delete", "holo", "npc", "reload", "help"}) {
                 if (s.startsWith(args[0].toLowerCase())) out.add(s);
+            }
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("holo")) {
+            for (String s : new String[]{"text", "height", "scale", "reset"}) {
+                if (s.startsWith(args[1].toLowerCase())) out.add(s);
             }
         } else if (args.length == 2 && args[0].equalsIgnoreCase("npc")) {
             for (String s : new String[]{"create", "edit", "name", "link", "delete", "list"}) {
