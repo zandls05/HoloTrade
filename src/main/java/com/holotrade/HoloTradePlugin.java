@@ -69,6 +69,15 @@ public class HoloTradePlugin extends JavaPlugin implements CommandExecutor, TabC
         if (npcs != null) npcs.save();
     }
 
+    /** Abre el menu de compra de un NPC (estilo aldeano por defecto; "chest" = menu de inventario). */
+    public void openNpcShop(Player p, NpcShop s) {
+        if ("chest".equalsIgnoreCase(getConfig().getString("npc.menu-style", "merchant"))) {
+            new NpcShopMenu(this, s, p).open(p);
+        } else {
+            new NpcMerchantMenu(this, s, p).open();
+        }
+    }
+
     public ShopManager shops() { return shops; }
     public TradeService trades() { return trades; }
     public NpcManager npcs() { return npcs; }
