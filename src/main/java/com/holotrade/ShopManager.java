@@ -73,6 +73,8 @@ public class ShopManager {
 
     /** Se llama al cerrar el editor. Devuelve false si la tienda se elimino por no estar configurada. */
     public boolean finishEdit(TradeShop s) {
+        // si la tienda ya fue eliminada (boton TNT, /ht delete...), no recrear el holograma
+        if (shops.get(s.key()) != s) return true;
         if (s.isReady()) {
             s.configured = true;
         } else if (!s.configured) {
