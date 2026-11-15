@@ -102,6 +102,9 @@ public class ShopManager {
                     s.payMode = PayMode.valueOf(c.getString("paymode", "ITEM"));
                 } catch (IllegalArgumentException ignored) {
                 }
+                s.customText = c.getString("holo-text");
+                s.holoHeight = c.getDouble("holo-height", -1);
+                s.holoScale = (float) c.getDouble("holo-scale", 1.0);
                 s.offer = c.getItemStack("offer");
                 s.price = c.getItemStack("price");
                 s.moneyPrice = c.getDouble("money", 0);
@@ -136,6 +139,9 @@ public class ShopManager {
             cfg.set(p + "stock", s.stock);
             cfg.set(p + "cooldown", s.cooldown);
             cfg.set(p + "pool", s.pool);
+            cfg.set(p + "holo-text", s.customText);
+            cfg.set(p + "holo-height", s.holoHeight);
+            cfg.set(p + "holo-scale", s.holoScale);
         }
         try {
             plugin.getDataFolder().mkdirs();
@@ -157,13 +163,32 @@ public class ShopManager {
             if (e != null) e.remove();
         }
         s.displays.clear();
+        // barrido por si quedaron hologramas huerfanos (recarga con PlugManX, UUID perdido, etc.)
+        World w = Bukkit.getWorld(s.world);
+        if (w != null && w.isChunkLoaded(s.x >> 4, s.z >> 4)) {
+            Location c = new Location(w, s.x + 0.5, s.y + 4, s.z + 0.5);
+            for (Entity e : w.getNearbyEntities(c, 1.0, 7.0, 1.0)) {
+                if (e instanceof Display && e.getScoreboardTags().contains(TAG)) e.remove();
+            }
+        }
+    }
+
+    /** Elimina TODOS los displays de HoloTrade de los chunks cargados. */
+    public void sweepOrphans() {
+        for (World w : Bukkit.getWorlds()) {
+            for (Entity e : w.getEntitiesByClass(Display.class)) {
+                if (e.getScoreboardTags().contains(TAG)) e.remove();
+            }
+        }
     }
 
     public void removeAllDisplays() {
         for (TradeShop s : shops.values()) removeDisplays(s);
+        sweepOrphans();
     }
 
     public void refreshAll() {
+        sweepOrphans();
         for (TradeShop s : shops.values()) refresh(s);
     }
 
@@ -185,7 +210,8 @@ public class ShopManager {
                 ? new ItemStack(Material.ENDER_CHEST) : s.offer.clone();
         shown.setAmount(1);
 
-        double baseY = s.y + plugin.getConfig().getDouble("display.height", 1.35);
+        double baseY = s.y + (s.holoHeight >= 0 ? s.holoHeight : plugin.getConfig().getDouble("display.height", 1.35));
+        final Vector3f scale = new Vector3f(SCALE).mul(s.holoScale);
         Location base = new Location(w, s.x + 0.5, baseY, s.z + 0.5);
 
         ItemDisplay item = w.spawn(base, ItemDisplay.class, d -> {
@@ -193,10 +219,10 @@ public class ShopManager {
             d.setPersistent(false);
             d.addScoreboardTag(TAG);
             d.setBillboard(Display.Billboard.FIXED);
-            d.setTransformation(new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(SCALE), new Quaternionf()));
+            d.setTransformation(new Transformation(new Vector3f(), new Quaternionf(), scale, new Quaternionf()));
         });
 
-        final String text = buildText(s);
+        final String text = s.customText != null && !s.customText.isBlank() ? s.customText.replace('&', '§') : buildText(s);
         TextDisplay label = w.spawn(base.clone().add(0, 0.6, 0), TextDisplay.class, d -> {
             d.text(Txt.t(text));
             d.setPersistent(false);
@@ -247,7 +273,7 @@ public class ShopManager {
                     d.setInterpolationDelay(0);
                     d.setInterpolationDuration(20);
                     d.setTransformation(new Transformation(new Vector3f(),
-                            new Quaternionf().rotateY(s.spin), new Vector3f(SCALE), new Quaternionf()));
+                            new Quaternionf().rotateY(s.spin), new Vector3f(SCALE).mul(s.holoScale), new Quaternionf()));
                 }
             }
         }, 20L, 20L);
