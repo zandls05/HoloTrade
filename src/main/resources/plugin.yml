@@ -1,0 +1,22 @@
+name: HoloTrade
+version: 2.0.0
+main: com.holotrade.HoloTradePlugin
+api-version: '26.2'
+softdepend: [Vault]
+description: Tiendas holograma sobre bloques + NPC tipo Shopkeepers con pago en items o dinero.
+commands:
+  holotrade:
+    description: Menu principal de HoloTrade
+    aliases: [ht, htrade]
+    usage: /ht [menu|create|list|delete|npc|reload]
+permissions:
+  holotrade.use:
+    default: true
+  holotrade.create:
+    default: true
+  holotrade.money:
+    description: Permite configurar precios en dinero (Vault)
+    default: op
+  holotrade.admin:
+    description: Tiendas admin (stock infinito), editar/borrar tiendas ajenas, reload
+    default: op

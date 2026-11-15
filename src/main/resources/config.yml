@@ -1,0 +1,61 @@
+max-shops-per-player: 5        # tiendas holograma
+max-npc-shops-per-player: 3    # tiendas NPC
+max-bulk: 64                   # maximo de compras con Shift+click en NPC
+
+# Tipo DEMANDA (holograma)
+demand-decay-seconds: 60
+demand-money-step: 0.10        # +10% del precio en dinero por cada punto de demanda
+
+# Fidelidad (NPC): descuento en pagos con dinero segun compras previas del jugador en esa tienda
+loyalty:
+  percent-per-purchase: 0.5
+  max-percent: 15
+
+npc:
+  notify-owner: true
+
+display:
+  height: 1.35
+
+messages:
+  prefix: "&8[&6HoloTrade&8] &7"
+  no-permission: "&cNo tienes permiso."
+  admin-only: "&cSolo admins pueden hacer eso."
+  money-denied: "&cNo tienes permiso para cobrar con dinero (holotrade.money)."
+  no-economy: "&cNo hay economia disponible (instala Vault + un plugin de economia)."
+  look-at-block: "&cMira un bloque (a menos de 6 bloques)."
+  already-shop: "&cEse bloque ya es una tienda."
+  limit-reached: "&cLlegaste al limite de {max} tiendas."
+  created: "&aTienda creada. Configura el tradeo en el editor."
+  deleted: "&eTienda eliminada."
+  editor-cancelled: "&eTienda sin configurar: se cancelo la creacion."
+  not-configured: "&cEsta tienda aun no esta configurada."
+  no-stock: "&cSin stock."
+  cooldown: "&cEspera {time} para volver a tradear aqui."
+  no-payment: "&cNecesitas {amount}x {item}&c."
+  no-money: "&cNecesitas {amount}."
+  no-xp: "&cNecesitas {levels} niveles de experiencia."
+  success: "&aTradeo realizado: recibiste &f{item}&a."
+  not-yours: "&cEsa tienda no es tuya."
+  not-a-shop: "&cEse bloque no es una tienda."
+  break-denied: "&cNo puedes romper una tienda ajena."
+  reloaded: "&aConfiguracion recargada."
+  # --- NPC ---
+  npc-created: "&aNPC creado. Configura sus ofertas en el editor."
+  npc-deleted: "&eNPC eliminado."
+  npc-not-found: "&cMira a un NPC de tienda (a menos de 6 bloques)."
+  npc-limit: "&cLlegaste al limite de {max} NPC."
+  npc-renamed: "&aNombre actualizado."
+  npc-link-start: "&eHaz click derecho sobre el cofre/barril que sera el stock de esta tienda."
+  npc-link-ok: "&aCofre vinculado."
+  npc-link-invalid: "&cEso no es un cofre, barril o shulker valido."
+  npc-no-chest: "&cEsta tienda no tiene cofre vinculado."
+  npc-no-stock: "&cSin stock."
+  npc-limit-player: "&cAlcanzaste tu limite de compras de esta oferta."
+  npc-cooldown: "&cEspera {time} para volver a comprar esto."
+  npc-no-items: "&cNo tienes los items necesarios."
+  npc-no-money: "&cNo tienes suficiente dinero."
+  npc-no-space: "&cLa tienda no tiene espacio para recibir tu pago."
+  npc-bought: "&aComprado: &f{item}&a por &f{cost}&a."
+  npc-partial: "&7(Compra detenida: {reason})"
+  npc-owner-notify: "&e{player} &7compro &f{item} &7en tu tienda &f{shop}&7."
