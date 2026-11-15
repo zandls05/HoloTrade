@@ -31,6 +31,12 @@ public class TradeShop {
     public int demand;
     public long lastDecay;
     public float spin;
+    /** Texto personalizado del holograma (lineas separadas por \n, codigos &). null = automatico. */
+    public String customText;
+    /** Altura sobre el bloque; <0 = usar display.height de config. */
+    public double holoHeight = -1;
+    /** Escala del item flotante. */
+    public float holoScale = 1f;
     public final Map<UUID, Long> lastUse = new HashMap<>();
     public final List<UUID> displays = new ArrayList<>();
 
